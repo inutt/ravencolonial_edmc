@@ -127,6 +127,24 @@ class PluginConfig:
             config.set('ravencolonial_check_prerelease', value)
         except (ImportError, AttributeError):
             pass
+    
+    @staticmethod
+    def get_open_browser() -> bool:
+        """Get whether to open the browser on creating a project"""
+        try:
+            from config import config
+            return config.get_bool('ravencolonial_open_browser', default=True)
+        except (ImportError, AttributeError):
+            return False
+    
+    @staticmethod
+    def set_open_browser(value: bool):
+        """Set whether to open the browser on creating a project"""
+        try:
+            from config import config
+            config.set('ravencolonial_open_browser', value)
+        except (ImportError, AttributeError):
+            pass
 
 
 def plugin_issue_log_path_hint(plugin_dir: str) -> str:

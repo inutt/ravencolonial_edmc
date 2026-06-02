@@ -882,7 +882,7 @@ class CreateProjectDialog:
                 self.plugin.queue_initial_project_supply_update(build_id, depot_fields)
             
             # Open project page in browser (no success popup)
-            if build_id:
+            if build_id and self.plugin.open_browser:
                 open_url(f"https://ravencolonial.com/#build={build_id}")
             self.result = result
             self.dialog.destroy()

@@ -280,6 +280,9 @@ class RavencolonialPlugin:
         self.update_available = False
         self.update_dismissed = False
 
+        # Browser opening flag
+        self.open_browser = PluginConfig.get_open_browser()
+
     def ensure_cmdr_snapshot_once(self) -> None:
         """Read ``monitor.cmdr`` from EDMC once and cache for architect gate (main thread)."""
         if self.cmdr_snapshot is not None:
@@ -1446,6 +1449,8 @@ def _persist_ravencolonial_prefs_from_frame(frame: nb.Frame, cmdr: Optional[str]
     config.set('ravencolonial_stealth_mode', frame.stealth_var.get())
     config.set('ravencolonial_stealth_ship_cargo', frame.stealth_ship_cargo_var.get())
     config.set('ravencolonial_stealth_construction_reporting', frame.stealth_construction_var.get())
+    config.set('ravencolonial_open_browser', frame.open_browser_var.get())
+    this.open_browser = frame.open_browser_var.get()
     _theme_pick = frame.overlay_theme_combo.get()
     _theme_tid = frame._theme_display_to_id.get(_theme_pick, frame.overlay_theme_var.get())
     config.set('ravencolonial_overlay_theme', _theme_tid)
@@ -1577,29 +1582,42 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
         ),
     )
     stealth_construction_help.grid(row=9, column=1, sticky=tk.W, padx=10, pady=(0, 10))
+
+    # Open browser on new project checkbox - store as frame attribute
+    frame.open_browser_var = tk.BooleanVar(value=PluginConfig.get_open_browser())
+    open_browser_check = nb.Checkbutton(frame, text=i18n.tr("Open new project page in browser"), variable=frame.open_browser_var)
+    open_browser_check.grid(row=10, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
+    open_browser_help = nb.Label(
+        frame,
+        text=i18n.tr(
+            "If enabled, when a new construction project is created the default web browser "
+            "will be opened to the project's page on ravencolonial."
+        ),
+    )
+    open_browser_help.grid(row=11, column=1, sticky=tk.W, padx=10, pady=(0, 10))
     
     # Update Settings Section
     update_section_label = nb.Label(frame, text=i18n.tr("Update Settings:"), font=('TkDefaultFont', 10, 'bold'))
-    update_section_label.grid(row=10, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(10, 5))
+    update_section_label.grid(row=12, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(10, 5))
 
     # Check for updates checkbox - store as frame attribute
     frame.check_updates_var = tk.BooleanVar(value=PluginConfig.get_check_updates())
     check_updates_check = nb.Checkbutton(frame, text=i18n.tr("Check for updates on startup"), variable=frame.check_updates_var)
-    check_updates_check.grid(row=11, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
+    check_updates_check.grid(row=13, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
 
     # Auto-update checkbox - store as frame attribute
     frame.autoupdate_var = tk.BooleanVar(value=PluginConfig.get_autoupdate())
     autoupdate_check = nb.Checkbutton(frame, text=i18n.tr("Automatically install updates"), variable=frame.autoupdate_var)
-    autoupdate_check.grid(row=12, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
+    autoupdate_check.grid(row=14, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
 
     # Check pre-releases checkbox - store as frame attribute
     frame.prerelease_var = tk.BooleanVar(value=PluginConfig.get_check_prerelease())
     prerelease_check = nb.Checkbutton(frame, text=i18n.tr("Include pre-release versions"), variable=frame.prerelease_var)
-    prerelease_check.grid(row=13, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
+    prerelease_check.grid(row=15, column=0, columnspan=2, sticky=tk.W, padx=10, pady=2)
 
     # Update settings help text
     update_help = nb.Label(frame, text=i18n.tr("Auto-update requires EDMC restart to apply. Use cautiously."))
-    update_help.grid(row=14, column=1, sticky=tk.W, padx=10, pady=(0, 10))
+    update_help.grid(row=16, column=1, sticky=tk.W, padx=10, pady=(0, 10))
     
     # Version number with update check
     # Store as frame attributes to prevent garbage collection
@@ -1607,7 +1625,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
         value=i18n.trf("Version: {version} (checking for updates...)", version=plugin_version)
     )
     frame.version_label = nb.Label(frame, textvariable=frame.version_text)
-    frame.version_label.grid(row=15, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(10, 5))
+    frame.version_label.grid(row=17, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(10, 5))
     
     def check_for_updates():
         """Check GitHub for updates in background thread"""
@@ -1676,7 +1694,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
             webbrowser.open(github_url)
 
         github_link.bind('<Button-1>', open_github_fallback)
-    github_link.grid(row=16, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 10))
+    github_link.grid(row=18, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 10))
 
 
     overlay_theme_label = nb.Label(
@@ -1684,7 +1702,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
         text=i18n.tr("Overlay Theme:"),
         font=("TkDefaultFont", 10, "bold"),
     )
-    overlay_theme_label.grid(row=17, column=0, sticky=tk.W, padx=10, pady=(8, 2))
+    overlay_theme_label.grid(row=19, column=0, sticky=tk.W, padx=10, pady=(8, 2))
 
     try:
         _saved_theme = config.get_str("ravencolonial_overlay_theme") or DEFAULT_OVERLAY_THEME_ID
@@ -1714,7 +1732,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
     overlay_theme_combo.bind("<<ComboboxSelected>>", _on_overlay_theme_selected)
     frame.overlay_theme_combo = overlay_theme_combo
     frame._theme_display_to_id = _theme_display_to_id
-    overlay_theme_combo.grid(row=17, column=1, sticky=tk.W, padx=10, pady=(8, 2))
+    overlay_theme_combo.grid(row=19, column=1, sticky=tk.W, padx=10, pady=(8, 2))
 
     overlay_theme_help = nb.Label(
         frame,
@@ -1722,14 +1740,14 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
             "Colors the in-game overlay: build name and trip lines, system name, commodity names, and numeric columns."
         ),
     )
-    overlay_theme_help.grid(row=18, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 8))
+    overlay_theme_help.grid(row=20, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 8))
 
     overlay_dep_label = nb.Label(
         frame,
         text=i18n.tr("Overlay dependency:"),
         font=("TkDefaultFont", 10, "bold"),
     )
-    overlay_dep_label.grid(row=20, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(4, 5))
+    overlay_dep_label.grid(row=22, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(4, 5))
 
     overlay_dep_help = nb.Label(
         frame,
@@ -1737,7 +1755,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
             "The build tracker overlay requires EDMC Modern Overlay to be installed and enabled in EDMC."
         ),
     )
-    overlay_dep_help.grid(row=21, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 4))
+    overlay_dep_help.grid(row=23, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 4))
 
     modern_overlay_url = "https://github.com/SweetJonnySauce/EDMCModernOverlay"
     if HyperlinkLabel is not None:
@@ -1757,13 +1775,13 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
             webbrowser.open(modern_overlay_url)
 
         overlay_dep_link.bind("<Button-1>", open_modern_overlay_repo)
-    overlay_dep_link.grid(row=22, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 6))
+    overlay_dep_link.grid(row=24, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 6))
 
     overlay_font_hint = nb.Label(
         frame,
         text=i18n.tr("Click here to install custom fonts."),
     )
-    overlay_font_hint.grid(row=23, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 4))
+    overlay_font_hint.grid(row=25, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 4))
 
     _prefs_plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -1784,7 +1802,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
         text=i18n.tr("Install overlay fonts"),
         command=_install_overlay_fonts,
     )
-    overlay_font_button.grid(row=24, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 10))
+    overlay_font_button.grid(row=26, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 10))
 
     # Save button (explicit save; prefs_changed also persists when the main Settings dialog OK is used)
     def save_settings():
@@ -1792,7 +1810,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: Optional[str], is_beta: bool) -> nb.
         _persist_ravencolonial_prefs_from_frame(frame, cmdr)
 
     save_button = nb.Button(frame, text=i18n.tr("Save Settings"), command=save_settings)
-    save_button.grid(row=25, column=0, columnspan=2, pady=20)
+    save_button.grid(row=27, column=0, columnspan=2, pady=20)
 
     if this:
         this._prefs_frame = frame
