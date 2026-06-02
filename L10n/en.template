@@ -105,6 +105,8 @@
 "When enabled, does not send your ship cargo hold or loadout snapshot to Ravencolonial" = "When enabled, does not send your ship cargo hold or loadout snapshot to Ravencolonial";
 "Stealth: all construction delivery reporting" = "Stealth: all construction delivery reporting";
 "When enabled, does not send colonization depot progress, contribution totals, or CargoDepot deliveries to Ravencolonial (journal-driven construction sync only)" = "When enabled, does not send colonization depot progress, contribution totals, or CargoDepot deliveries to Ravencolonial (journal-driven construction sync only)";
+"Open new project page in browser" = "Open new project page in browser";
+"If enabled, when a new construction project is created the default web browser will be opened to the project's page on ravencolonial." = "If enabled, when a new construction project is created the default web browser will be opened to the project's page on ravencolonial.";
 "Update Settings:" = "Update Settings:";
 "Check for updates on startup" = "Check for updates on startup";
 "Automatically install updates" = "Automatically install updates";
